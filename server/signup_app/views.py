@@ -13,6 +13,8 @@ from rest_framework.status import (
     HTTP_204_NO_CONTENT,
 )
 
+# 
+
 class Sign_Up(APIView):
     def post(self, request):
         request.data["username"] = request.data["email"]
@@ -38,9 +40,24 @@ class Log_out(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+
     def post(self, request):
+        user = request.user
+        user_data = {
+        "email": user.email,
+        "id": user.id,
+        "username": getattr(user, "username", None),
+    }
         request.user.auth_token.delete()
-        return Response(status=HTTP_204_NO_CONTENT)
+        return Response({"message": "Logged out successfully", "user": user_data})
+    
+
+class Info(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({"email": request.user.email})
     
 class Master_Sign_Up(APIView):
 
