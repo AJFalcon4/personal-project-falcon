@@ -18,7 +18,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 class CreatePaymentIntent(UserPermissions):
     def post(self, request):
 
-        ticket_id = request.data.get('lesson_id')
+        ticket_id = request.data.get('ticket_id')
         ticker = get_object_or_404(Ticket, id=ticket_id)
 
         if not ticket.user:
@@ -27,7 +27,7 @@ class CreatePaymentIntent(UserPermissions):
         elif ticket.user != request.user:
             return Response(status=s.HTTP_403_FORBIDDEN)
         
-        ticket.user = request.user.
+        ticket.user = request.user
         ticket.save()
         
         amount = Decimal(ticket.ticket_template.price)
