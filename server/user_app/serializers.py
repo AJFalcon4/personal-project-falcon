@@ -4,7 +4,7 @@ from .models import MyUsers, UserProfile
 # TODO
 # ensure following serializers are created for implementation,
 # --if not using sep ser's for comment adapt to use single comment ser--
-# from event_app.serializers import EventWishlistSerializer
+from event_app.serializers import EventWishlistSerializer
 # from comment_app.serializers import EventCommentSerializer, MerchandiseReviewSerializer
 from ticket_app.serializers import TicketSerializer
 # from merchandise_app.serializers import MerchandiseWishListSerializer
@@ -31,12 +31,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
     is_admin = serializers.BooleanField(source='user.is_admin', read_only=True)
     is_staff = serializers.BooleanField(source='user.is_staff', read_only=True)
     is_superuser = serializers.BooleanField(source='user.is_superuser', read_only=True)
-    # TODO item (stand in for event w/l)
-    # event_wishlists = EventWishlistSerializer(
-    #     source='user.event_wishlists', 
-    #     many=True, 
-    #     read_only=True
-    # )
+    
+    event_wishlists = EventWishlistSerializer(
+        source='user.event_wishlists', 
+        many=True, 
+        read_only=True
+    )
     # TODO item (stand in for merch w/l)
     # merchandise_wishlists = MerchandiseWishlistSerializer(
     #     source='user.merchandise_wishlists', 
@@ -81,13 +81,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
             # Uncomment when ready
             #      |
             #      V
-            # 'event_wishlists',
+            'event_wishlists',
             # 'merchandise_wishlists', 
             # 'event_comments',  
             # 'merchandise_reviews',  
             # 'comments',  # Use this if only singular ser
-            # 'tickets',  
+            'tickets',  
         ]
+
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
     '''
@@ -102,9 +103,8 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         ]
 
 
-# TODO team-check (needed?)
 class AdminPromotionSerializer(serializers.Serializer):
-    """Serializer for promoting/demoting users to/from admin."""
+    """For promoting/demoting users to/from admin."""
     email = serializers.EmailField()
     action = serializers.ChoiceField(choices=['promote', 'demote'])
     
