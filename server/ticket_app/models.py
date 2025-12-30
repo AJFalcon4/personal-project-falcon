@@ -15,5 +15,5 @@ class TicketTemplate(models.Model):
 # Purchased ticket
 class Ticket(models.Model):
     userprofile = models.ForeignKey(MyUsers, on_delete=models.CASCADE, related_name="ticket_purchases")
-    ticket = models.ForeignKey(TicketTemplate, on_delete=models.PROTECT)
+    ticket_template = models.ForeignKey(TicketTemplate, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField()
