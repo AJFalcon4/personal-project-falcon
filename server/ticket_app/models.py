@@ -1,6 +1,7 @@
 from django.db import models
 from user_app.models import MyUsers
 from django.core.exceptions import ValidationError
+from django.core import validators as v
 
 
 
@@ -22,4 +23,4 @@ class TicketTemplate(models.Model):
 class Ticket(models.Model):
     userprofile = models.ForeignKey(MyUsers, on_delete=models.CASCADE, related_name="ticket_purchases")
     ticket = models.ForeignKey(TicketTemplate, on_delete=models.PROTECT)
-    quantity = models.PositiveIntegerField()
+    quantity = models.PositiveIntegerField(validators=[v.MinValueValidator(1)])

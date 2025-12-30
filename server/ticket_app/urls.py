@@ -1,4 +1,4 @@
-from .views import TicketView, TicketsPurchasedView, TicketTemplatesView
+from .views import TicketView,TicketTemplatesView, TicketPurchasedView
 from django.urls import path
 
 urlpatterns = [
@@ -6,7 +6,7 @@ urlpatterns = [
     path('purchase/', TicketView.as_view(), name='ticket_purchase'),
     
     # view all user's purchased tickets
-    path('purchased_tickets/',TicketsPurchasedView.as_view(), name="purchased_tickets"),
+    path('purchased_tickets/',TicketPurchasedView.as_view(), name="purchased_tickets"),
     
     # view all ticket templates 
     path('ticket_templates/', TicketTemplatesView.as_view(), name="ticket_templates")

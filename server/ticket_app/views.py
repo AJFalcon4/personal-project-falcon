@@ -74,7 +74,7 @@ class TicketView(APIView):
 
 
 # View user's purchased tickets
-class TicketPurchaseView(CreateAPIView):
+class TicketPurchasedView(CreateAPIView):
     serializer_class = TicketSerializer
     permission_classes = [IsAuthenticated]
     @transaction.atomic

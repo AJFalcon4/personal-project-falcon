@@ -2,7 +2,6 @@ from rest_framework import serializers
 from .models import TicketTemplate, Ticket
 from payments_app.serializers import PaymentSerializer
 from rest_framework.exceptions import ValidationError
-from django.db.models import Sum
 
 class TicketTemplateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,19 +22,5 @@ class TicketSerializer(serializers.ModelSerializer):
     payment = PaymentSerializer(read_only=True)
     class Meta:
         model = Ticket
-        fields = ['ticket_type', 'quantity', 'ticket']   
+        fields = ['ticket_type', 'quantity', 'ticket', 'payment']   
     
-    def validate(self, data):
-        ticket_template = data["ticket"]
-        requested_qty = data["quantity"]
-        already_sold = (
-            Ticket.objects
-            .filter(ticket=ticket_template)
-            .aggregate(total=Sum("quantity"))["total"]
-            or 0 
-        )
-
-        remaining = ticket_template.available_quantity - already_sold
-        if requested_qty > remaining:
-            raise ValidationError(f"Only {remaining} tickets are still available for this ticket type.")
-        return data 
