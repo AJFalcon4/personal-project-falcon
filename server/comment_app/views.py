@@ -13,7 +13,7 @@ from rest_framework.status import (
     HTTP_403_FORBIDDEN,
     HTTP_401_UNAUTHORIZED
 )
-from .services import build_comment_tree
+# from .services import build_comment_tree
 from event_app.models import Event
 
 
@@ -27,8 +27,13 @@ class CommentView(APIView):
     # READ (anyone)
     def get(self, request, event_id):
         event = get_object_or_404(Event, id=event_id)
-        comments = build_comment_tree(event)
-        return Response(comments, status=HTTP_200_OK)
+        parents = (
+            Comment.objects
+            .filter(event=event,parent=None)
+            .select_related("author")
+        )
+        ser = CommentSerializer(parents, many=True)
+        return Response(ser.data, status=HTTP_200_OK)
 
     # CREATE (authenicated users)
     def post(self, request, event_id):
@@ -37,9 +42,8 @@ class CommentView(APIView):
             ser = CommentSerializer(data=request.data)
             if ser.is_valid():
                 parent = ser.validated_data.get("parent")
-                # parent and child's events should match
                 if parent and parent.event != event:
-                    Response({"detail": "Parent and child's events should match."}, status=HTTP_400_BAD_REQUEST)
+                    return Response({"detail": "Parent and child's events must be match up."}, status=HTTP_400_BAD_REQUEST)
                 ser.save(author=request.user, event=event)
                 return Response(ser.data, status=HTTP_201_CREATED)
             else:

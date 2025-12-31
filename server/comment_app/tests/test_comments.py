@@ -8,7 +8,7 @@ from user_app.models import MyUsers
 from event_app.models import Event
 from comment_app.models import Comment
 from comment_app.services import build_comment_tree
-from comment_app.serializers import CommentRecursiveSerializer
+from comment_app.serializers import CommentSerializer
 from datetime import date, time
 
 
@@ -107,7 +107,7 @@ class CommentAPITests(APITestCase):
         qs = Comment.objects.filter(event=self.event, parent=None)
 
         start = pytime.perf_counter()
-        CommentRecursiveSerializer(qs, many=True).data
+        CommentSerializer(qs, many=True).data
         duration = pytime.perf_counter() - start
 
         print(f"Recursive serializer: {duration:.6f}s\n")
@@ -173,7 +173,7 @@ class CommentBenchmarkTests(APITestCase):
         qs = Comment.objects.filter(event=self.event, parent=None)
 
         with CaptureQueriesContext(connection) as rec_ctx:
-            CommentRecursiveSerializer(qs, many=True).data
+            CommentSerializer(qs, many=True).data
 
         print("\n--- QUERY COUNTS ---")
         print("Adjacency list queries:", len(adj_ctx))
@@ -194,7 +194,7 @@ class CommentBenchmarkTests(APITestCase):
         qs = Comment.objects.filter(event=self.event, parent=None)
 
         start = pytime.perf_counter()
-        CommentRecursiveSerializer(qs, many=True).data
+        CommentSerializer(qs, many=True).data
         rec_time = pytime.perf_counter() - start
 
         print("\n--- TIME COMPARISON ---")
@@ -208,7 +208,7 @@ class CommentBenchmarkTests(APITestCase):
         qs = Comment.objects.filter(event=self.event, parent=None)
 
         with CaptureQueriesContext(connection) as ctx:
-            CommentRecursiveSerializer(qs, many=True).data
+            CommentSerializer(qs, many=True).data
 
         print("\n--- SCALE TEST ---")
         print("Recursive queries at scale:", len(ctx))
@@ -262,7 +262,7 @@ class CommentBenchmarkTests(APITestCase):
 
         with CaptureQueriesContext(connection) as rec_ctx:
             start = pytime.perf_counter()
-            CommentRecursiveSerializer(qs, many=True).data
+            CommentSerializer(qs, many=True).data
             rec_time = pytime.perf_counter() - start
 
         # ---------------- ADJACENCY ----------------
