@@ -1,9 +1,20 @@
 from rest_framework import serializers
 from .models import Payment
-from user_app.serializers import UsersSerializer
 
 class PaymentSerializer(serializers.ModelSerializer):
-    user = UsersSerializer(read_only=True)
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    # changed to break circular imports
+    """
+    # Add user details via method field if needed
+    user_email = serializers.SerializerMethodField()
+    user_name = serializers.SerializerMethodField()
+    
+    def get_user_email(self, obj):
+        return obj.ticket.user.email
+    
+    def get_user_name(self, obj):
+        return obj.ticket.user.full_name
+    """
 
     class Meta:
         model = Payment
