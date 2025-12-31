@@ -49,11 +49,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
         many=True,
         read_only=True
     )
-    tickets = TicketSerializer(
-        source='user.tickets',
-        many=True,
-        read_only=True
-    )
+    
+    tickets = serializers.SerializerMethodField()
+    
+    def get_tickets(self, obj):
+        """Lazy import to avoid circular dependency."""
+        from ticket_app.serializers import TicketSerializer
+        return TicketSerializer(obj.user.tickets.all(), many=True).data
 
     """
     For Merchandise_app future implementation
