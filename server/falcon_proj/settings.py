@@ -75,10 +75,9 @@ MIDDLEWARE = [
 ]
 
 
-
-
-
 ROOT_URLCONF = 'falcon_proj.urls'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 TEMPLATES = [
     {
