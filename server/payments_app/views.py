@@ -3,57 +3,74 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status as s
 import stripe
-from .models import Payment
+from .models import Order, OrderItem, Payment
 from .serializers import PaymentSerializer
-from ticket_app.models import Ticket
+from ticket_app.models import Ticket, TicketTemplate
 from falcon_proj import settings
 from decimal import Decimal
 from django.shortcuts import get_object_or_404
+from rest_framework.status import HTTP_400_BAD_REQUEST
+from django.db import transaction
+from rest_framework.validators import ValidationError
+
 
 # Create your views here.
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe.api_key = settings.STRIPE_API_KEY
 
 class CreatePaymentIntent(APIView):
     def post(self, request):
+        cart = request.data.get("items")
+        if not cart:
+            return Response({"detail": "Cart empty"}, status=HTTP_400_BAD_REQUEST)
+        with transaction.atomic():
+            order = Order.objects.create(user=request.user)
+            for item in cart:
+                tt = TicketTemplate.objects.select_for_update().get(
+                    id=item["ticket_template_id"]
+                )
 
-        ticket_id = request.data.get('ticket_id')
-        ticket = get_object_or_404(Ticket, id=ticket_id)
-
-        if not ticket.user:
-            if not hasattr(request.user, 'user'):
-                return Response({'detail': 'Only users can buy tickets'}, status=s.HTTP_403_FORBIDDEN)
-        elif ticket.user != request.user:
-            return Response(status=s.HTTP_403_FORBIDDEN)
-        
-        ticket.user = request.user
-        ticket.save()
-        
-        amount = Decimal(ticket.ticket_template.price)
-        amount_cents = int(amount * 100)
-        
-        try:
+                if item["quantity"] > tt.available_quantity:
+                    raise ValidationError("Not enough tickets available.")
+                
+                tt.available_quantity -= item["quantity"]
+                # Recall: community lodging is an upgrade of the general ticket; thus, we need to also reduce the availability of general tickets 
+                if tt.title == "community lodging":
+                    general = TicketTemplate.objects.select_for_update().get(title="general")
+                    if item["quantity"] > general.available_quantity:
+                        raise ValidationError(
+                            "Not enough general tickets available for community lodging."
+                        )
+                    general.available_quantity -= item["quantity"]
+                    general.save()
+                tt.save()
+                OrderItem.objects.create(
+                    order=order,
+                    ticket_template=tt,
+                    quantity=item["quantity"],
+                    title_at_purchase=tt.title, 
+                    unit_price_at_purchase=tt.price,
+                    line_total=tt.price*item["quantity"],
+                )
+            order.recalculate_totals()
+            order.save()
             intent = stripe.PaymentIntent.create(
-                amount=amount_cents,
-                currency='usd',
-                metadata={'ticket_id': ticket.id}
+                amount=int(order.total * 100),
+                currency="usd",
+                metadata={"order_id": order.id},
             )
-
-            payment = Payment.objects.create(
-                ticket=ticket,
-                amount=amount,
+            Payment.objects.create(
+                order=order,
                 stripe_payment_intent_id=intent.id,
-                status='pending'
+                status="pending"
             )
-
-            return Response({
-                'client_secret': intent.client_secret,
-                'payment_id': payment.id
-            }, status=s.HTTP_201_CREATED)
-        
-        except Exception as e:
-            return Response({'error': str(e)}, status=s.HTTP_400_BAD_REQUEST)
-        
+        return Response(
+            {
+                "client_secret": intent.client_secret,
+                "order_id": order.id,
+            },
+            status=201
+        )
 
             
 class ViewPayment(APIView):

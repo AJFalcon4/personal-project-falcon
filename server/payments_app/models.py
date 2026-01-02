@@ -5,19 +5,21 @@ from ticket_app.models import TicketTemplate
 
 
 class Payment(models.Model):
-    # ticket will be replaced with Order?
-    order = models.OneToOneField('Order', on_delete=models.CASCADE, related_name='payment')
-    amount = models.DecimalField(max_digits=7, decimal_places=2, validators=[MinValueValidator(1.00), MaxValueValidator(1500.00)])
-    stripe_payment_intent_id = models.CharField(max_length=255, blank=True, null=True)
+    order = models.OneToOneField(
+        'Order',
+        on_delete=models.CASCADE,
+        related_name='payment'
+    )
+    stripe_payment_intent_id = models.CharField(max_length=255)
     status = models.CharField(
-    max_length=30,
-    choices=[('pending', 'Pending'), ('paid', 'Paid'), ('failed', 'Failed')],
-    default='pending'
+        max_length=30,
+        choices=[('pending', 'Pending'), ('paid', 'Paid'), ('failed', 'Failed')],
+        default='pending'
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.order.user.full_name} paid ${self.amount} for Order #{self.order.id}."
+        return f"Payment for Order #{self.order.id} ({self.status})"
     
 
     # TO-DO Create Order for tickets/payment
@@ -43,6 +45,13 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order #{self.id} for {self.user.email} is {self.status}."
+    
+    def recalculate_totals(self):
+        subtotal = sum(
+            item.line_total for item in self.items.all()
+        )
+        self.subtotal = subtotal
+        self.total = subtotal + self.tax + self.fees
     
 class OrderItem(models.Model):
     order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name="items")
