@@ -135,7 +135,7 @@ export default function NavBar({ user, setUser }) {
                   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     <Link
                       to="/login"
-                      className="rounded-md border border-forge-stone-700 px-4 py-2 text-sm font-medium text-forge-tan-300 transition-all hover:border-forge-gold-500 hover:text-forge-gold-400"
+                      className="rounded-md bg-gradient-to-r from-forge-red-700 to-forge-red-800 px-4 py-2 text-sm font-bold text-forge-tan-50 shadow-lg transition-all hover:from-forge-gold-600 hover:to-forge-gold-700 hover:shadow-forge-gold-500/50"
                     >
                       Login
                     </Link>

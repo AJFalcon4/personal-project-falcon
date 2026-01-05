@@ -1,6 +1,6 @@
 .hero-wrapper {
   width: 100%;
-  background-color: rgb(12, 12, 12); /* fills left + right */
+  background-color: #c10e0e; 
 }
 
 .hero-inner {
@@ -31,7 +31,7 @@
   margin: 0;
   padding: 0;
   min-height: 100%;
-  background-color: rgb(0, 0, 0);
+  background-color: #911414;
   color: #dae6db;
   text-align: center;
 }
@@ -57,11 +57,12 @@ h2 {
 }
 
 .hero-section {
-  min-height: 20vh;
+  min-height: 75vh;
   background-image: var(--hero-bg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-color: #410505;
 }
 
 
@@ -103,26 +104,28 @@ h2 {
 }
 
 .page-bg {
-  background-color: rgb(63, 23, 23);
+  background-color: #ba1b1b;
   min-height: 100vh;
 }
 
 .content {
   /* max-width: 1100px; */
   margin: 0 auto;
-  background-color: #671010;
+  background-color: #b51010;
 }
 
 
 .weathercolor {
-  text-shadow: #c1371b 1px 0 10px;
+  text-shadow: #1fbf7a 1px 0 10px;
   
 }
 
 .navigraph {
-  text-shadow: #9b4a0b 1px 0 10px;
+  text-shadow: #8383d4 1px 0 10px;
 }
 
 .card {
-  background-color:#fbf6eed3 !important;
+  background-color:#295ead !important;
+  border: #29ad57;
 }
+

@@ -40,7 +40,7 @@ export default function EventsPage() {
   const handleDelete = async (id) => {
     await deleteEvent(setEvents, id);
   };
-
+  
   return (
     <>
       
@@ -51,7 +51,7 @@ export default function EventsPage() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          minHeight: '45vh'
+          minHeight: '75vh'
         }}
       >
         <h1 className="text-white"></h1>
@@ -60,9 +60,16 @@ export default function EventsPage() {
 
       <h2>Events</h2>
 
-      <Button variant="primary" onClick={handleShow}>
+      {/* <Button variant="primary" onClick={handleShow}>
         Add an Event
-      </Button>
+      </Button> */}
+      <Button
+          onClick={handleShow}
+          style={{ backgroundColor: "", borderColor: "#87cefa", color: "black" }}
+        >
+          Add an Event
+        </Button>
+
 
       <CreateEventModal
         show={show}
