@@ -6,6 +6,8 @@ import { payForOrder } from "../utilities";
 import StripeCheckoutForm from "./StripeCheckoutForm"
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+console.log("VITE_STRIPE_PUBLISHABLE_KEY =", import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+
 
 export default function PaymentModal({ show, onClose, order }) {
     const [loading, setLoading] = useState(false);
