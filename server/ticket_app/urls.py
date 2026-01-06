@@ -1,6 +1,8 @@
-from .views import TicketView
+from .views import TicketTemplatesView
 from django.urls import path
 
 urlpatterns = [
-    path('purchase/', TicketView.as_view(), name='ticket_purchase'),
+    # view all ticket templates 
+    path('ticket_templates/', TicketTemplatesView.as_view(), name="ticket_templates"),
+
 ]
