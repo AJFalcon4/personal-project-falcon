@@ -25,7 +25,9 @@ BASE_URL = "http://localhost:8000"
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-STRIPE_API_KEY =  os.getenv('STRIPE_API_KEY')
+STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -47,14 +49,15 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
-    'signup_app',
+    'user_app',
     'ticket_app',
     'weather_app',
     'comment_app',
     'event_app',
+    'payments_app',
 ]
-
-AUTH_USER_MODEL = 'signup_app.MyUsers'
+# added user app and changed auth path
+AUTH_USER_MODEL = 'user_app.MyUsers'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -74,10 +77,9 @@ MIDDLEWARE = [
 ]
 
 
-
-
-
 ROOT_URLCONF = 'falcon_proj.urls'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 TEMPLATES = [
     {
