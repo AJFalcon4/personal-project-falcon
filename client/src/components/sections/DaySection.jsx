@@ -1,5 +1,5 @@
 import { Heading, Grid, VStack } from "@chakra-ui/react";
-import EventCard from "./EventCard";
+import EventCard from "../cards/EventCard";
 
 export default function DaySection({ day, events }) {
   return (

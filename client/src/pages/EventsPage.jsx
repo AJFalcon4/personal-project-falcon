@@ -9,10 +9,8 @@ import {
   HStack,
 } from "@chakra-ui/react";
 
-import CreateEventModal from "../components/CreateEventModal";
-import EditEventModal from "../components/EditEventModal";
-import DaySection from "../components/DaySection";
-import WeatherCard from "../components/WeatherCard";
+import DaySection from "../components/sections/DaySection";
+import WeatherCard from "../components/cards/WeatherCard";
 import CountdownTimer from "../components/CountdownTimer";
 import TicketsPage from "./TicketsPage";
 
@@ -25,9 +23,6 @@ import HeroicHall from "../assets/HeroicHall.jpeg";
 
 export default function EventsPage() {
   const [events, setEvents] = useState([]);
-  const [show, setShow] = useState(false);
-  const [editingEvent, setEditingEvent] = useState(null);
-  const [showEdit, setShowEdit] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -85,27 +80,7 @@ export default function EventsPage() {
             <Heading size="xl" color="white">
               Events
             </Heading>
-
-            {user?.is_staff && (
-              <Button bg="gray.500" size="lg" onClick={() => setShow(true)}>
-                Add an Event
-              </Button>
-            )}
           </HStack>
-
-          {/* Modals */}
-          <CreateEventModal
-            show={show}
-            handleClose={() => setShow(false)}
-            handleSave={(data) => createEvents(setEvents, data)}
-          />
-
-          <EditEventModal
-            show={showEdit}
-            handleClose={() => setShowEdit(false)}
-            event={editingEvent}
-            handleUpdate={(id, data) => updateEvent(setEvents, id, data)}
-          />
 
           {/* Days */}
           {Object.entries(eventsByDay).map(([day, dayEvents]) => (

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { SimpleGrid, VStack, Button, Heading } from "@chakra-ui/react";
-import TicketCard from "../components/TicketCard";
+import TicketCard from "../components/cards/TicketCard";
 import PaymentModal from "../components/PaymentModal";
 import { createOrder } from "../utilities";
 

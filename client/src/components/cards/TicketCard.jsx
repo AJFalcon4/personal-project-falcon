@@ -1,6 +1,6 @@
 import { Heading, Text, VStack, Input } from "@chakra-ui/react";
-import { MotionBox } from "./Motion";
-import BaseCard from "../components/BaseCard";
+import { MotionBox } from "../Motion";
+import BaseCard from "./BaseCard";
 
 export default function TicketCard({
   title,
