@@ -6,6 +6,8 @@ import Sidebar from './components/Sidebar'
 import { userConfirmation } from './utilities'
 import { Box } from '@chakra-ui/react'
 import { Toaster, toaster } from "./components/ui/toaster"
+
+
 function App() {
   const [user, setUser] = useState(null)
 
@@ -18,7 +20,7 @@ function App() {
   }, [])
 
   return (
-    <Box minH="100vh" bg="#0c0a09">
+    <Box minH="100vh" bg="bg.primary">
       <Toaster toaster={toaster}/>
       <Sidebar user={user} setUser={setUser} />
       

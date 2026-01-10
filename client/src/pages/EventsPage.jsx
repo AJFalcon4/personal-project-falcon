@@ -77,7 +77,7 @@ export default function EventsPage() {
         <VStack align="stretch" spacing={10}>
           {/* Header */}
           <HStack justify="space-between">
-            <Heading size="xl" color="white">
+            <Heading size="xl" color="text.primary">
               Events
             </Heading>
           </HStack>

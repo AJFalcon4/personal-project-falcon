@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { Button, VStack } from "@chakra-ui/react";
 import { showErrorToast } from "./ui/showErrorToast";
 import { showSuccessToast } from "./ui/showSuccessToast";
+import { primaryButtonStyles } from "../theme";
 
 export default function StripeCheckoutForm({ clientSecret, userId, onSuccess }) {
     const stripe = useStripe();
@@ -39,12 +41,20 @@ export default function StripeCheckoutForm({ clientSecret, userId, onSuccess }) 
     };
 
     return (
-        <form onSubmit={handleSubmit}>
+        <VStack as="form" onSubmit={handleSubmit} spacing={4} align="stretch">
             <PaymentElement />
 
-            <button type="submit" disabled={!stripe || !elements || processing} style={{ marginTop: 12}}>
+            <Button 
+                type="submit" 
+                isDisabled={!stripe || !elements || processing}
+                {...primaryButtonStyles}
+                _disabled={{
+                    opacity: 0.6,
+                    cursor: "not-allowed",
+                }}
+            >
                 {processing ? "Processing..." : "Pay"}
-            </button>
-        </form>
+            </Button>
+        </VStack>
     );
 }

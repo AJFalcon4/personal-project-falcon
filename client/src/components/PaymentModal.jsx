@@ -3,9 +3,10 @@ import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { payForOrder } from "../utilities";
 import StripeCheckoutForm from "./StripeCheckoutForm"
-import { Dialog, Button } from '@chakra-ui/react'
+import { Dialog, Button, Text, List, Box } from '@chakra-ui/react'
 import { showSuccessToast } from "./ui/showSuccessToast";
 import { showErrorToast } from "./ui/showErrorToast";
+import { outlineButtonStyles } from "../theme";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 export default function PaymentModal({ show, onClose, order }) {
@@ -48,42 +49,47 @@ export default function PaymentModal({ show, onClose, order }) {
         overflowY="auto"
         mt="-8vh"
         mb="auto"
+        bg="bg.secondary"
+        borderColor="border.accent"
+        borderWidth="2px"
       >
         <Dialog.Header>
-          <Dialog.Title>Pay for Order #{order?.id}</Dialog.Title>
-          <Dialog.CloseTrigger />
+          <Dialog.Title color="text.primary">Pay for Order #{order?.id}</Dialog.Title>
+          <Dialog.CloseTrigger color="text.secondary" />
         </Dialog.Header>
 
         <Dialog.Body>
-          <p>
-            <strong>Tickets:</strong>
-          </p>
-          <ul>
+          <Text fontWeight="bold" color="text.primary" mb={2}>
+            Tickets:
+          </Text>
+          <List.Root as="ul" pl={4} mb={4}>
             {(order?.items ?? []).map((item) => (
-              <li key={item.id}>
-                {item.title_at_purchase} × {item.quantity}
-              </li>
+              <List.Item key={item.id} color="text.secondary">
+                {item.title_at_purchase} x {item.quantity}
+              </List.Item>
             ))}
-          </ul>
+          </List.Root>
 
-          <p style={{ marginTop: "0.5rem" }}>
-            <strong>Total:</strong> ${order?.total}
-          </p>
+          <Text color="text.primary" mt={2}>
+            <Text as="span" fontWeight="bold">Total:</Text> ${order?.total}
+          </Text>
 
-          {loading && <p>Loading payment form...</p>}
+          {loading && <Text color="text.muted" mt={4}>Loading payment form...</Text>}
 
           {clientSecret && (
-            <Elements
-              stripe={stripePromise}
-              options={{ clientSecret }}
-            >
-              <StripeCheckoutForm order={order} onSuccess={onClose} />
-            </Elements>
+            <Box mt={4}>
+              <Elements
+                stripe={stripePromise}
+                options={{ clientSecret }}
+              >
+                <StripeCheckoutForm order={order} onSuccess={onClose} />
+              </Elements>
+            </Box>
           )}
         </Dialog.Body>
 
         <Dialog.Footer>
-          <Button variant="outline" onClick={onClose}>
+          <Button onClick={onClose} {...outlineButtonStyles}>
             Cancel
           </Button>
         </Dialog.Footer>
