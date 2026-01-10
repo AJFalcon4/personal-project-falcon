@@ -1,29 +1,24 @@
-import { useState } from "react"
-import { SimpleGrid, VStack, Button, Heading } from "@chakra-ui/react"
-import { Ticket, Users, Crown } from "lucide-react"
-import { MotionBox } from "../components/Motion"
-import { staggerContainer, staggerItem } from "../components/animations/fffAnimations"
-import TicketCard from "../components/cards/TicketCard"
-import PaymentModal from "../components/PaymentModal"
-import { createOrder } from "../utilities"
-import { primaryButtonStyles } from "../theme"
+import { useState } from "react";
+import { SimpleGrid, VStack, Button, Heading } from "@chakra-ui/react";
+import TicketCard from "../components/cards/TicketCard";
+import PaymentDrawer from "../components/PaymentDrawer";
+import { createOrder } from "../utilities";
 
 
-// Added staggered entrance animations for ticket cards
 export default function TicketsPage() {
-  const [showPaymentModal, setShowPaymentModal] = useState(false)
-  const [order, setOrder] = useState(null)
-  const [ticketA, setTicketA] = useState(0)
-  const [ticketB, setTicketB] = useState(0)
-  const [ticketC, setTicketC] = useState(0)
+  const [showPaymentDrawer, setShowPaymentDrawer] = useState(false);
+  const [order, setOrder] = useState(null);
+  const [ticketA, setTicketA] = useState(0);
+  const [ticketB, setTicketB] = useState(0);
+  const [ticketC, setTicketC] = useState(0);
 
   const handleCheckout = async () => {
     const cart = { typeA: ticketA, typeB: ticketB, typeC: ticketC }
 
     try {
-      const createdOrder = await createOrder(cart)
-      setOrder(createdOrder)
-      setShowPaymentModal(true)
+      const createdOrder = await createOrder(cart);
+      setOrder(createdOrder);
+      setShowPaymentDrawer(true);
     } catch {
       alert("Something went wrong with the payment.")
     }
@@ -84,12 +79,12 @@ export default function TicketsPage() {
         Continue to Payment
       </Button>
 
-      {showPaymentModal && order && (
-        <PaymentModal
-          show={showPaymentModal}
+      {showPaymentDrawer && order && (
+        <PaymentDrawer
+          show={showPaymentDrawer}
           onClose={() => {
-            setShowPaymentModal(false)
-            setOrder(null)
+            setShowPaymentDrawer(false);
+            setOrder(null);
           }}
           order={order}
         />
