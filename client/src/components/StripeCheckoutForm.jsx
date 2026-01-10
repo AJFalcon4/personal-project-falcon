@@ -4,7 +4,6 @@ import { Button, VStack } from "@chakra-ui/react";
 import { showErrorToast } from "./ui/showErrorToast";
 import { showSuccessToast } from "./ui/showSuccessToast";
 import { decrementTickets } from "../utilities";
-import { Button } from "@chakra-ui/react"
 
 export default function StripeCheckoutForm({ onSuccess, order }) {
     const stripe = useStripe();

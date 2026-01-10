@@ -3,7 +3,10 @@ import { SimpleGrid, VStack, Button, Heading } from "@chakra-ui/react";
 import TicketCard from "../components/cards/TicketCard";
 import PaymentDrawer from "../components/PaymentDrawer";
 import { createOrder } from "../utilities";
-
+import { MotionBox } from "../components/Motion";
+import { staggerContainer,staggerItem } from "../components/animations/fffAnimations";
+import {Ticket,Users,Crown} from "lucide-react"
+import { primaryButtonStyles } from "../theme";
 
 export default function TicketsPage() {
   const [showPaymentDrawer, setShowPaymentDrawer] = useState(false);
