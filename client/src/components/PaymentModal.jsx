@@ -7,10 +7,14 @@ import { Dialog, Button } from '@chakra-ui/react'
 import { showSuccessToast } from "./ui/showSuccessToast";
 import { showErrorToast } from "./ui/showErrorToast";
 
+
+
+  
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-export default function PaymentModal({ show, onClose, order }) {
+export default function PaymentModal({ show, onClose, order, }) {
     const [loading, setLoading] = useState(false);
     const [clientSecret, setClientSecret] = useState("");
+    const appearance = {theme: 'night'};
     
 
     const initializePayment = async () => {
@@ -34,7 +38,6 @@ export default function PaymentModal({ show, onClose, order }) {
         }
     }, [show, order.id]);
 
-  
     return (
     <Dialog.Root
       open={show}
@@ -44,17 +47,18 @@ export default function PaymentModal({ show, onClose, order }) {
       preventScroll={false}
     >
       <Dialog.Content
+        bg="gray.800"
         maxH='90vh'
         overflowY="auto"
         mt="-8vh"
         mb="auto"
       >
         <Dialog.Header>
-          <Dialog.Title>Pay for Order #{order?.id}</Dialog.Title>
+          <Dialog.Title size="lg" color="white">Pay for Order</Dialog.Title>
           <Dialog.CloseTrigger />
         </Dialog.Header>
 
-        <Dialog.Body>
+        <Dialog.Body color="gray.400" fontSize="sm">
           <p>
             <strong>Tickets:</strong>
           </p>
@@ -75,7 +79,7 @@ export default function PaymentModal({ show, onClose, order }) {
           {clientSecret && (
             <Elements
               stripe={stripePromise}
-              options={{ clientSecret }}
+              options={{ clientSecret, appearance }}
             >
               <StripeCheckoutForm order={order} onSuccess={onClose} />
             </Elements>
@@ -83,7 +87,7 @@ export default function PaymentModal({ show, onClose, order }) {
         </Dialog.Body>
 
         <Dialog.Footer>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} color="gray.400" fontSize="sm">
             Cancel
           </Button>
         </Dialog.Footer>
