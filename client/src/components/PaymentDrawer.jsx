@@ -11,7 +11,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 export default function PaymentDrawer({ show, onClose, order }) {
   const [loading, setLoading] = useState(false);
   const [clientSecret, setClientSecret] = useState("");
-  const appearance = { theme: "night" };
+  const appearance = { theme: "night", hideAssistant: {enabled: false}};
 
   const initializePayment = async () => {
     if (!order.id) return;
@@ -50,6 +50,7 @@ export default function PaymentDrawer({ show, onClose, order }) {
           alignItems={{ base: "flex-end", md: "stretch" }}
         >
         <Drawer.Content
+          borderLeft='0.5px solid #b91c1c'
           bg="gray.800"
           overflowY="auto"
           h={{ base: "92vh", md: "100vh" }}
@@ -101,7 +102,7 @@ export default function PaymentDrawer({ show, onClose, order }) {
           </Drawer.Body>
 
           <Drawer.Footer>
-            <Button variant="outline" onClick={onClose} color="gray.400" fontSize="sm">
+            <Button variant="outline" onClick={onClose} color="gray.400" fontSize="sm" borderColor='#b91c1c' borderRadius='0.5px'>
               Cancel
             </Button>
           </Drawer.Footer>
