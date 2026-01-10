@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { showErrorToast } from "./ui/showErrorToast";
 import { showSuccessToast } from "./ui/showSuccessToast";
+import { decrementTickets } from "../utilities";
 
-export default function StripeCheckoutForm({ clientSecret, userId, onSuccess }) {
+export default function StripeCheckoutForm({ clientSecret, userId, onSuccess, order }) {
     const stripe = useStripe();
     const elements = useElements();
     const [processing, setProcessing] = useState(false);
@@ -30,6 +31,7 @@ export default function StripeCheckoutForm({ clientSecret, userId, onSuccess }) 
             if (paymentIntent?.status === "succeeded") {
                 showSuccessToast("Payment", "Payment successful!");
                 onSuccess?.(paymentIntent);
+                decrementTickets(order.id)
             } else {
                 showErrorToast("Payment", `Payment status: ${paymentIntent?.status ?? "unknown"}`);
             }
