@@ -1,9 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-# TODO
-# consider refactor to replace is_admin with is_staff (removes bloat)
-# profile pic y/n? If y, then implement pillow
+# TODO: consider refactor to replace is_admin with is_staff (removes bloat)
 
 class MyUsers(AbstractUser):
     email = models.EmailField(unique=True)
