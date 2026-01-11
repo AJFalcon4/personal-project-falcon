@@ -1,33 +1,34 @@
-import { useState, useEffect} from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import { Outlet, useLoaderData } from 'react-router-dom'
-import NavBar from './components/NavBar'
+import { useState, useEffect } from 'react'
+// import './index.css'
+// import './App.css'
+import { Outlet } from 'react-router-dom'
+import Sidebar from './components/Sidebar'
 import { userConfirmation } from './utilities'
+import { Box } from '@chakra-ui/react'
+import { Toaster, toaster } from "./components/ui/toaster"
 
 
 function App() {
-  const [user, setUser] = useState(null);
-  // for each rerender, confirm that the user is logged in 
+  const [user, setUser] = useState(null)
+
   useEffect(() => {
     const restoreUser = async () => {
-      const confirmedUser = await userConfirmation();
-      setUser(confirmedUser);
-    };
-    restoreUser();
-  }, []);
-  return (
-    <div className="page-bg">
-      <NavBar user={user} setUser={setUser}/>
+      const confirmedUser = await userConfirmation()
+      setUser(confirmedUser)
+    }
+    restoreUser()
+  }, [])
 
-      <main className="content">
-         <Outlet context={{ user, setUser }} />
-      </main>
-    </div>
+  return (
+    <Box minH="100vh" bg="bg.primary">
+      <Toaster toaster={toaster}/>
+      <Sidebar user={user} setUser={setUser} />
+      
+      <Box>
+        <Outlet context={{ user, setUser }} />
+      </Box>
+    </Box>
   )
 }
-
-
 
 export default App

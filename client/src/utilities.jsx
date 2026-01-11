@@ -4,48 +4,45 @@ export const api = axios.create({
   baseURL: "http://127.0.0.1:8000/",
 });
 
-
-
 export const userLogIn = async (email, password) => {
-  console.log(email, password)
+  console.log('Login attempt:', email)
   try {
-    let response = await api.post("signup/login/", {
+    let response = await api.post("user/login/", {
       email: email,
       password: password,
     });
-    let {users, token} = response.data;
-    console.log(`user: ${users}, token: ${token}`)
+    
+    // FIXED: Backend returns 'user' (singular), not 'users'
+    let {user, token} = response.data;
+    console.log(`Logged in user: ${user}, token: ${token}`)
+    
     localStorage.setItem("token", token);
     api.defaults.headers.common["Authorization"] = `Token ${token}`;
-    return users;
+    
+    return user;  // Return the user email
 
-  }
-  catch (e) {
-    console.log(e)
-    return null;
+  } catch (e) {
+    throw e;
   }
 };
 
-export const userLogOut = async (onUserUpdate) => {
+export const userLogOut = async () => {
   try {
-    const response = await api.post("signup/logout/");
+    const response = await api.post("user/logout/");
     
     localStorage.removeItem("token");
     delete api.defaults.headers.common["Authorization"];
 
-    alert("Logout request completed");
+    console.log("Logout successful");
     return null;
-
 
   } catch (err) {
     console.error("Logout failed:", err);
     localStorage.removeItem("token");
     delete api.defaults.headers.common["Authorization"];
-
-    alert("Something went wrong during logout.");
+    throw err
   }
 };
-
 
 export const userConfirmation = async () => {
   const token = localStorage.getItem("token");
@@ -54,8 +51,8 @@ export const userConfirmation = async () => {
   api.defaults.headers.common["Authorization"] = `Token ${token}`;
 
   try {
-    const response = await api.get("signup/info/");
-    console.log('user', response.data)
+    const response = await api.get("user/info/");
+    console.log('User confirmed:', response.data)
     if (response.status === 200) return response.data;
   } catch (err) {
     console.log("User confirmation failed:", err.response?.status);
@@ -65,17 +62,43 @@ export const userConfirmation = async () => {
   }
 };
 
+// ============= PAYMENTS =============
 
-export const stripeCheckout = async (cart) => {
+export const createOrder = async (cart) => {
   try {
-    const response = await api.post("ticket/purchase/", cart)
+    const response = await api.post("payments/orders/create/", cart)
     console.log(response)
     return response.data;
   } catch(err) {
     console.error("something went wrong", err);
-    return "/tickets"
+    throw err;
   }
 }
+
+export const payForOrder = async (orderId) => {
+  try {
+    const response = await api.post(`payments/create-intent/`, {
+      order_id: orderId,
+    });
+    return response.data 
+  } catch (err) {
+    console.log("Error paying for order.");
+    throw err;
+  }
+};
+
+export const decrementTickets = async (orderId) => {
+  try {
+    const response = await api.patch(`ticket/decrement/`, {order_id: orderId,
+    });
+    return response
+  } catch (err) {
+    console.log("Error decrementing ticket quantity.");
+    throw err;
+  }
+}
+
+// ============= PAYMENTS =============
 
 export const grabWeather = async () => {
   try {
@@ -89,7 +112,6 @@ export const grabWeather = async () => {
     console.error(e)
   }
 }
-
 
 // ============= EVENTS =============
 
@@ -123,7 +145,6 @@ export const deleteEvent = async(setEvents, id) => {
   }
 }
 
-
 export const updateEvent = async(setEvents, id, data) => {
   try{
     await api.put(`event/${id}/`, data)
@@ -133,3 +154,42 @@ export const updateEvent = async(setEvents, id, data) => {
     console.error(e)
   }
 }
+
+// ============= USER PROFILE =============
+
+export const fetchUserProfile = async () => {
+  try {
+    const response = await api.get("user/account/");
+    return response.data;
+  } catch (err) {
+    console.error("Failed to fetch user profile:", err);
+    throw err;
+  }
+};
+
+export const fetchUserTickets = async () => {
+  try {
+    const response = await api.get("user/tickets/");
+    return response.data;
+  } catch (err) {
+    console.error("Failed to fetch user tickets:", err);
+    throw err;
+  }
+};
+
+export const uploadProfilePicture = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append('profile_pic', file);
+
+    const response = await api.patch("user/account/", formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (err) {
+    console.error("Failed to upload profile picture:", err);
+    throw err;
+  }
+};
