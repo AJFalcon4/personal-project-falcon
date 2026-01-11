@@ -90,7 +90,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             # ================================
             'bio',
             'phone_number',
-            # 'profile_picture', # When pillow is configured, profile pic can be integrated
+            'profile_pic',
 
             # ================================
             # Related data (all-in-one query)
@@ -106,11 +106,24 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
     """Used to update profile."""
-    
+
     class Meta:
         model = UserProfile
         fields = [
             'bio',
             'phone_number',
-            # 'profile_picture', # REQ pillow implementation
+            'profile_pic',
         ]
+
+    def validate_profile_pic(self, value):
+        if value:
+            # Check file size (5MB max)
+            if value.size > 5 * 1024 * 1024:
+                raise serializers.ValidationError("Image file too large. Max size is 5MB.")
+
+            # Check file type
+            valid_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
+            if value.content_type not in valid_types:
+                raise serializers.ValidationError("Invalid image type. Upload JPG, PNG, or GIF.")
+
+        return value
