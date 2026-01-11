@@ -52,3 +52,10 @@ class DecrementTemplate(User_Auth):
         order.status = "paid"
         order.save(update_fields=["status"])
         return Response({"detail": "Tickets successfully decremented."})
+    
+
+
+
+# Upon creation of an order, also decrement by ticket amount. Put a 10 minute hold on this. Send it back to the customer?
+# On successful payment, actually decrement. How?
+# On success, send decrementTicket, send a function to kill holdTicket. 
