@@ -93,3 +93,11 @@ def release_order_inventory(order):
     order.reserved_until = None
     order.save(update_fields=['status', 'reserved_until'])
     return order
+
+def release_expired_holds():
+    now = timezone.now()
+    expired = (
+        Order.objects.select_for_update(skip_locked=True).filter(status="reserved", reserved_until__lte=now)
+    )
+    for order in expired:
+        release_order_inventory(order)

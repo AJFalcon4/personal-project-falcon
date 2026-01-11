@@ -12,7 +12,7 @@ from django.db import transaction
 from rest_framework.validators import ValidationError
 from user_app.views import User_Auth
 from decimal import Decimal
-from .services import reserve_order_inventory
+from .services import reserve_order_inventory, release_expired_holds
 import stripe
 
 
@@ -23,6 +23,7 @@ stripe.api_key = settings.STRIPE_API_KEY
 class CreatePaymentIntent(User_Auth):
     @transaction.atomic
     def post(self, request):
+        release_expired_holds()
         order_id = request.data.get("order_id")
         if not order_id:
             return Response({"detail": "order_id required."}, status=s.HTTP_400_BAD_REQUEST)
@@ -157,8 +158,11 @@ class CreateOrder(User_Auth):
 
         return Response(OrderSerializer(order).data, status=s.HTTP_201_CREATED)
 
+
 class ReserveTickets(User_Auth):
+    @transaction.atomic
     def patch(self, request):
+        release_expired_holds()
         order_id = request.data.get('order_id')
         if not order_id:
             return Response({'detail': 'order_id required'}, status=s.HTTP_400_BAD_REQUEST)
