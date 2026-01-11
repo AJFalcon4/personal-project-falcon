@@ -71,7 +71,7 @@ export const createOrder = async (cart) => {
     return response.data;
   } catch(err) {
     console.error("something went wrong", err);
-    return "/tickets"
+    throw err;
   }
 }
 
@@ -87,6 +87,16 @@ export const payForOrder = async (orderId) => {
   }
 };
 
+export const decrementTickets = async (orderId) => {
+  try {
+    const response = await api.patch(`ticket/decrement/`, {order_id: orderId,
+    });
+    return response
+  } catch (err) {
+    console.log("Error decrementing ticket quantity.");
+    throw err;
+  }
+}
 
 // ============= PAYMENTS =============
 

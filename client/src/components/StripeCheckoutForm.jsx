@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { Button, VStack } from "@chakra-ui/react";
+import { showErrorToast } from "./ui/showErrorToast";
+import { showSuccessToast } from "./ui/showSuccessToast";
+import { primaryButtonStyles } from "../theme";
 
-export default function StripeCheckoutForm({ clientSecret, userId, onSuccess }) {
+export default function StripeCheckoutForm({ order, onSuccess }) {
     const stripe = useStripe();
     const elements = useElements();
     const [processing, setProcessing] = useState(false);
@@ -14,35 +18,49 @@ export default function StripeCheckoutForm({ clientSecret, userId, onSuccess }) 
         setProcessing(true);
 
         try {
-
             const { error, paymentIntent } = await stripe.confirmPayment({
                 elements,
                 redirect: "if_required"
             });
 
             if (error) {
-                alert(error.message || "Payment failed.");
+                showErrorToast("Payment Failed", error.message || "Something went wrong.");
+                setProcessing(false);
                 return;
             }
 
             if (paymentIntent?.status === "succeeded") {
-                alert("Payment successful!");
-                onSuccess?.(paymentIntent);
+                showSuccessToast("Payment Successful", "Thank you for your purchase!");
+                // Small delay to ensure toast renders before drawer closes
+                setTimeout(() => {
+                    onSuccess?.(paymentIntent);
+                }, 500);
             } else {
-                alert(`Payment status: ${paymentIntent?.status ?? "unknown"}`);
+                showErrorToast("Payment Issue", `Status: ${paymentIntent?.status ?? "unknown"}`);
+                setProcessing(false);
             }
-        } finally {
+        } catch (err) {
+            console.error("Payment error:", err);
+            showErrorToast("Payment Error", "An unexpected error occurred.");
             setProcessing(false);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit}>
+        <VStack as="form" onSubmit={handleSubmit} spacing={4} align="stretch">
             <PaymentElement />
 
-            <button type="submit" disabled={!stripe || !elements || processing} style={{ marginTop: 12}}>
+            <Button 
+                type="submit" 
+                disabled={!stripe || !elements || processing}
+                {...primaryButtonStyles}
+                _disabled={{
+                    opacity: 0.6,
+                    cursor: "not-allowed",
+                }}
+            >
                 {processing ? "Processing..." : "Pay"}
-            </button>
-        </form>
+            </Button>
+        </VStack>
     );
 }
