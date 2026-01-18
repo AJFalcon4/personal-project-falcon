@@ -1,64 +1,54 @@
-from django.shortcuts import render
-from django.conf import settings 
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.status import HTTP_303_SEE_OTHER, HTTP_200_OK
+from rest_framework.status import HTTP_200_OK
+from .serializers import TicketTemplateSerializer
+from .models import TicketTemplate
+from user_app.views import User_Auth
+from django.shortcuts import get_object_or_404
+from payments_app.models import Order
+from rest_framework import status as s
+from rest_framework.validators import ValidationError
+from django.db import transaction
 
-import stripe
 
-stripe.api_key = settings.STRIPE_API_KEY
+# View all ticket templates 
+class TicketTemplatesView(APIView):
+    def get(self,request):
+        ticket_templates = TicketTemplate.objects.all()
+        ser_ticket_templates = TicketTemplateSerializer(ticket_templates, many=True)
+        return Response(ser_ticket_templates.data, status=HTTP_200_OK)
 
-# This class represents all the requests made related to tickets.
-class TicketView(APIView):
-    def get(self, request):
-        print('in get for ticket view')
-        my_response = Response('Hello World',status=HTTP_200_OK)
-        print('response created')
-        print(my_response)
-        return my_response
 
-    # When someone wants to buy a Ticket, they'll need to make a post request.
-    # Before they can purchase a ticket user must be authenticated. 
-    # POST = CREATE
-    # For now left commented out to make request without needing auth oursevles, uncomment when deployed.
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    def post(self, request):
-        line_items = []
-        ticketQtyA = request.data.get("typeA")
-        if (ticketQtyA):
-            line_items.append({
-                "price": "price_1Se4zBPgEHDjnAGo7JXfIGFH",
-                "quantity": ticketQtyA
-            })
-        ticketQtyB = request.data.get("typeB")
-        if (ticketQtyB):
-            line_items.append({
-                "price": "price_1Se53YPgEHDjnAGoOGJoeJhm",
-                "quantity": ticketQtyB
+class DecrementTemplate(User_Auth):
+    @transaction.atomic
+    def patch(self, request):
+        order_id = request.data.get("order_id")
+        req_id = request.headers.get("X-Request-ID")
+        print("DECREMENT PATCH", order_id, "req_id=", req_id)
+        if not order_id:
+            return Response({"detail": "order_id required."}, status=s.HTTP_400_BAD_REQUEST)
+        order = Order.objects.select_for_update().get(id=order_id, user=request.user)
+
+        if order.status == 'paid':
+            return Response({"detail": 'Tickets already decremented.'})
         
-            })
-        ticketQtyC = request.data.get("typeC")
-        if (ticketQtyC):
-            line_items.append({
-                "price": "price_1Se54ZPgEHDjnAGolleqQKtM",
-                "quantity": ticketQtyC
+        items = list(order.items.select_related("ticket_template"))
         
-            })
-        # NOTE: Switch PRICE IDS
-        checkout_session = stripe.checkout.Session.create(
-            line_items=line_items,
-
-            # The available ways to pay:
-            payment_method_types=['card'],
-            # mode is the type of payment (one, sub, etc.)
-            mode = 'payment',
-            # usually, when it's a one-time payment, you want to create a customer for that payment
-            customer_creation='always',
-            # for the success_url, when the purchase goes through, this is where the user is redirected
-            success_url="http://localhost:5173/", # should redirect to page showing their ticke they purchased
-            cancel_url="http://localhost:5173/" # should redirect to page to buy tickets 
-        )
-        return Response(checkout_session.url, status=HTTP_200_OK)
+        for item in items:
+            tt = TicketTemplate.objects.select_for_update().get(
+                id=item.ticket_template.id
+            )
+            tt.available_quantity -= item.quantity
+            # Recall: community lodging is an upgrade of the general ticket; thus, we need to also reduce the availability of general tickets 
+            if tt.ticket_type == "community":
+                general = TicketTemplate.objects.select_for_update().get(ticket_type="general")
+                if item.quantity > general.available_quantity:
+                    raise ValidationError(
+                        "Not enough general tickets available for community lodging."
+                    )
+                general.available_quantity -= item.quantity
+                general.save()
+            tt.save()
+        order.status = "paid"
+        order.save(update_fields=["status"])
+        return Response({"detail": "Tickets successfully decremented."})

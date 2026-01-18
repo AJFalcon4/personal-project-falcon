@@ -1,101 +1,90 @@
-import { useEffect, useState } from "react";
-import Button from 'react-bootstrap/Button';
-import CreateEventModal from "../components/CreateEventModal";
-import EditEventModal from "../components/EditEventModal";
-import EventCard from "../components/EventCard";
-import { fetchEvents, createEvents, deleteEvent, updateEvent, userConfirmation } from "../utilities";
+import { useEffect, useState, useRef } from "react";
+import {
+  Box,
+  Heading,
+  Container,
+  Grid,
+  VStack,
+  HStack,
+} from "@chakra-ui/react";
+import { useOutletContext } from "react-router-dom";
+
+import DaySection from "../components/sections/DaySection";
+import WeatherCard from "../components/cards/WeatherCard";
+import CountdownTimer from "../components/CountdownTimer";
+import TicketsPage from "./TicketsPage";
+import { fetchEvents } from "../utilities";
 import HeroicHall from "../assets/HeroicHall.jpeg";
-import WeatherCard from "../components/WeatherCard";
 
 export default function EventsPage() {
   const [events, setEvents] = useState([]);
-  const [show, setShow] = useState(false);
-  const [editingEvent, setEditingEvent] = useState(null);
-  const [showEdit, setShowEdit] = useState(false);
-  const [user, setUser] = useState(null);
+  const { user } = useOutletContext(); // Get user from App.jsx instead of duplicate call
+  const hasFetched = useRef(false);
 
   useEffect(() => {
+    // Prevent StrictMode double-fetch
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+    
     fetchEvents(setEvents);
   }, []);
 
-  useEffect(() => {
-    const restoreUser = async () => {
-      const confirmedUser = await userConfirmation();
-      setUser(confirmedUser);
-    };
-    restoreUser();
-  }, []);
-
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-
-  const handleSave = async (data) => {
-    await createEvents(setEvents, data);
-  };
-
-  const handleUpdate = async (id, data) => {
-    await updateEvent(setEvents, id, data);
-  };
-
-  const handleDelete = async (id) => {
-    await deleteEvent(setEvents, id);
-  };
+  const eventsByDay = events.reduce((acc, event) => {
+    const day = event.day;
+    if (!acc[day]) acc[day] = [];
+    acc[day].push(event);
+    return acc;
+  }, {});
 
   return (
-    <>
-      
-      <div
-        className="hero-section d-flex align-items-center justify-content-center weathercolor"
-        style={{
-          backgroundImage: `url(${HeroicHall})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          minHeight: '45vh'
-        }}
+    <Box>
+      {/* Hero */}
+      <Box
+        bgImage={`url(${HeroicHall})`}
+        bgSize="cover"
+        bgPosition="center"
+        minH="45vh"
+        display="flex"
+        alignItems="center"
       >
-        <h1 className="text-white"></h1>
-        <WeatherCard/>
-      </div>
+        <Grid
+          templateColumns={{ base: "1fr", md: "1fr 1fr" }}
+          gap={6}
+          w="100%"
+          maxW="1200px"
+          mx="auto"
+          px={4}
+        >
+          <WeatherCard />
+          <Box textAlign={{ base: "center", md: "right" }}>
+            <CountdownTimer />
+          </Box>
+        </Grid>
+      </Box>
 
-      <h2>Events</h2>
+      {/* Tickets */}
+      <TicketsPage />
+      
+      {/* Events */}
+      <Container maxW="container.xl" py={10}>
+        <VStack align="stretch" spacing={10}>
+          {/* Header */}
+          <HStack justify="space-between">
+            <Heading size="xl" color="text.primary">
+              Events
+            </Heading>
+          </HStack>
 
-      <Button variant="primary" onClick={handleShow}>
-        Add an Event
-      </Button>
-
-      <CreateEventModal
-        show={show}
-        handleClose={handleClose}
-        handleSave={handleSave}
-      />
-
-      <EditEventModal
-        show={showEdit}
-        handleClose={() => setShowEdit(false)}
-        event={editingEvent}
-        handleUpdate={handleUpdate}
-      />
-
-      <div className="events-container">
-        {events.map((event) => (
-          <EventCard
-            key={event.id}
-            id={event.id}
-            title={event.title}
-            day={event.day}
-            start_time={event.start_time}
-            end_time={event.end_time}
-            location={event.location}
-            description={event.description}
-            onClickDelete={() => handleDelete(event.id)}
-            onClickUpdate={() => {
-              setEditingEvent(event);
-              setShowEdit(true);
-            }}
-          />
-        ))}
-      </div>
-    </>
+          {/* Days */}
+          {Object.entries(eventsByDay).map(([day, dayEvents]) => (
+            <DaySection
+              key={day}
+              day={day}
+              events={dayEvents}
+            />
+          ))}
+        </VStack>
+      </Container>
+    </Box>
   );
 }

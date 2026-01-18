@@ -1,14 +1,22 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("ticket/", include("ticket_app.urls")),
-    path("signup/", include("signup_app.urls")),
+    path("payments/", include("payments_app.urls")),
+    # corrected pathing to user
+    path("user/", include("user_app.urls")),
     path("weather/", include("weather_app.urls")),
-    path("event/",include("event_app.urls")),
-    path("comment/",include("comment_app.urls"))
+    path("event/", include("event_app.urls")),
+    path("comment/", include("comment_app.urls"))
 ]
+
+# Serve media files during development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 """
 NEXT TO DO LIST, FRONT END:

@@ -1,67 +1,105 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
+import { useState } from "react";
+import {
+  Box,
+  Button,
+  Container,
+  Heading,
+  Input,
+  VStack,
+} from "@chakra-ui/react";
+import { Field } from "@chakra-ui/react";
+import { MotionBox } from "../components/Motion";
+import { fadeInUp } from "../components/animations/fffAnimations";
 import { useNavigate, useOutletContext } from "react-router-dom";
-
-export const api = axios.create({
-  baseURL: "http://127.0.0.1:8000/",
-});
+import { showSuccessToast } from "../components/ui/showSuccessToast";
+import { showErrorToast } from "../components/ui/showErrorToast";
+import { api } from "../utilities";
+import { inputStyles, primaryButtonStyles } from "../theme";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const {setUser} = useOutletContext();
-  const navigate = useNavigate()
-    const handleClick = async (e) => {
-        e.preventDefault()
-        const data = {"email": email, "password": password}
-        const response = await axios.post("http://127.0.0.1:8000/signup/new_account/", data);
-        console.log(response.data)
-        alert("We've Made Your Badass Account");
-        if (response.status === 201) {
-            let { user, token } = response.data;
-            localStorage.setItem("token", token);
-            api.defaults.headers.common["Authorization"] = `Token ${token}`;
-            setUser(user)
-      }     
-        navigate("/")
-    
-    };
+  const { setUser } = useOutletContext();
+  const navigate = useNavigate();
+
+  const handleClick = async (e) => {
+    e.preventDefault();
+
+    try {
+      const data = { email, password };
+      const response = await api.post("user/new_account/", data);
+      const { user, token } = response.data;
+
+      localStorage.setItem("token", token);
+      api.defaults.headers.common["Authorization"] = `Token ${token}`;
+
+      showSuccessToast("Sign up", "We've Made Your Badass Account");
+      setUser(user);
+      navigate("/");
+    } catch (err) {
+      showErrorToast(
+        "Sign up",
+        err.response?.data.error || "Something went wrong :("
+      );
+    }
+  };
+
   return (
-    <>
-      <h1>SignUp</h1>
-      <Form onSubmit= {(e) => handleClick(e)}>
-        <Form.Group className="mb-3" controlId="formBasicEmail">
-          <Form.Label>Email Address</Form.Label>
-          <Form.Control
-            onChange={(e) => setEmail(e.target.value)}
-            value={email}
-            type="email"
-            placeholder="Enter email"
-            name="email"
-          />
-          <Form.Text className="text-muted">
-            We'll never share your email with anyone else.
-          </Form.Text>
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="formBasicPassword">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            onChange={(e) => setPassword(e.target.value)}
-            value={password}
-            type="password"
-            placeholder="Password"
-            name = "password"
-          />
-        </Form.Group>
-        
-        <Button variant="primary" type="submit">
-          Submit
-        </Button>
-        
-      </Form>
-    </>
+    <Container maxW="md" py={20}>
+      <MotionBox {...fadeInUp}>
+        <Box
+          bg="bg.secondary"
+          borderRadius="lg"
+          borderWidth="2px"
+          borderColor="border.accent"
+          p={8}
+          boxShadow="xl"
+        >
+          <VStack spacing={6} as="form" onSubmit={handleClick}>
+            {/* Header */}
+            <Heading size="xl" color="text.primary">
+              Sign Up
+            </Heading>
+
+            {/* Email Field */}
+            <Field.Root w="100%">
+              <Field.Label color="text.secondary">Email Address</Field.Label>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter email"
+                {...inputStyles}
+                required
+              />
+            </Field.Root>
+
+            {/* Password Field */}
+            <Field.Root w="100%">
+              <Field.Label color="text.secondary">Password</Field.Label>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                {...inputStyles}
+                required
+              />
+            </Field.Root>
+
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              w="100%"
+              size="lg"
+              {...primaryButtonStyles}
+            >
+              Submit
+            </Button>
+          </VStack>
+        </Box>
+      </MotionBox>
+    </Container>
   );
 };
 
