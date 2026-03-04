@@ -11,42 +11,43 @@ import EditCommentModal from "../components/modals/EditCommentModal";
 import DeleteCommentModal from "../components/modals/DeleteCommentModal";
 import { MotionBox } from "../components/Motion";
 import { staggerContainer, staggerItem, fadeInUp } from "../components/animations/fffAnimations";
-import { addReply, updateRecursive, deleteRecursive, useEventComments} from "../components/forum/ForumHelpers";
+import { useEventComments } from "../components/forum/ForumHelpers";
 
 // Sample general discussion comments
-const tavernComments = [
-  {
-    id: 101,
-    author: "DungeonMaster_Mike",
-    authorId: 101,
-    isAdmin: true,
-    time: "1 day ago",
-    text: "Welcome to The Tavern! This is the place for general questions, announcements, and chatting with fellow FalCON attendees. Feel free to introduce yourself!",
-    likes: [102, 103, 104, 105],
-    replies: [],
-  },
-  {
-    id: 102,
-    author: "NewAdventurer_Sam",
-    authorId: 110,
-    isAdmin: false,
-    time: "12 hours ago",
-    text: "Hey everyone! First time at FalCON and super excited. Anyone else coming from the NYC area? Maybe we can carpool!",
-    likes: [101, 103],
-    replies: [
-      {
-        id: 103,
-        author: "VeteranPaladin",
-        authorId: 105,
-        isAdmin: false,
-        time: "10 hours ago",
-        text: "Welcome! I'm actually driving up from Jersey. DM me if you want to coordinate!",
-        likes: [110],
-        replies: [],
-      },
-    ],
-  },
-];
+// const tavernComments = [] 
+// const tavernComments = [
+//   {
+//     id: 101,
+//     author: "DungeonMaster_Mike",
+//     authorId: 101,
+//     isAdmin: true,
+//     time: "1 day ago",
+//     text: "Welcome to The Tavern! This is the place for general questions, announcements, and chatting with fellow FalCON attendees. Feel free to introduce yourself!",
+//     likes: [102, 103, 104, 105],
+//     replies: [],
+//   },
+//   {
+//     id: 102,
+//     author: "NewAdventurer_Sam",
+//     authorId: 110,
+//     isAdmin: false,
+//     time: "12 hours ago",
+//     text: "Hey everyone! First time at FalCON and super excited. Anyone else coming from the NYC area? Maybe we can carpool!",
+//     likes: [101, 103],
+//     replies: [
+//       {
+//         id: 103,
+//         author: "VeteranPaladin",
+//         authorId: 105,
+//         isAdmin: false,
+//         time: "10 hours ago",
+//         text: "Welcome! I'm actually driving up from Jersey. DM me if you want to coordinate!",
+//         likes: [110],
+//         replies: [],
+//       },
+//     ],
+//   },
+// ];
 
 /**
  * The Tavern - General Discussion Page
@@ -54,8 +55,8 @@ const tavernComments = [
 export default function TavernPage() {
   const { year } = useParams();
 
-  const wsRef = useRef()
-  const EC = useEventComments()
+  const {comments, create, reply, edit, like, remove} = useEventComments(null, year)
+
   
   // Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -66,39 +67,6 @@ export default function TavernPage() {
   
   // Mock current user
   const currentUserId = 110;
-
-  const [comments, setComments] = useState([])
-
-  useEffect(() => {
-    const socket = new WebSocket(
-      `ws://localhost:8001/ws/comments/general/${year}/`
-    );
-    wsRef.current = socket;
-
-    socket.onmessage = (e) => {
-      const { type, comment } = JSON.parse(e.data);
-
-      setComments((prev) => {
-        switch (type) {
-          case "new_comment":
-            return comment.parent
-              ? addReply(prev, comment.parent, comment)
-              : [...prev, comment];
-
-          case "update_comment":
-            return updateRecursive(prev, comment);
-
-          case "delete_comment":
-            return deleteRecursive(prev, comment.id);
-
-          default:
-            return prev;
-        }
-      });
-    };
-
-    return () => socket.close();
-  }, [year]);
 
   const handleReply = (comment) => {
     setSelectedComment(comment);
@@ -188,7 +156,7 @@ export default function TavernPage() {
               Discussions
             </Text>
             <Text fontSize="sm" color="forge.tan.500">
-              ({tavernComments.length})
+              ({comments.length})
             </Text>
           </HStack>
 
@@ -220,15 +188,15 @@ export default function TavernPage() {
           animate="visible"
         >
           <VStack align="stretch" gap={4}>
-            {tavernComments.map((comment) => (
-              <MotionBox key={comment.id} variants={staggerItem}>
+            {comments.map((comment) => (
+              <MotionBox key={comment.id} variants={staggerItem} initial="hidden" animate="visible">
                 <CommentCard
                   comment={comment}
                   currentUserId={currentUserId}
                   onReply={handleReply}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
-                  onLike={EC.like}
+                  onLike={like}
                 />
               </MotionBox>
             ))}
@@ -240,7 +208,7 @@ export default function TavernPage() {
       <CreateCommentModal
         show={showCreateModal}
         handleClose={() => setShowCreateModal(false)}
-        handleSave={EC.create}
+        handleSave={create}
       />
 
       <ReplyCommentModal
@@ -249,7 +217,7 @@ export default function TavernPage() {
           setShowReplyModal(false);
           setSelectedComment(null);
         }}
-        handleSave={EC.reply}
+        handleSave={reply}
         parentComment={selectedComment}
       />
 
@@ -259,7 +227,7 @@ export default function TavernPage() {
           setShowEditModal(false);
           setSelectedComment(null);
         }}
-        handleSave={EC.edit}
+        handleSave={edit}
         comment={selectedComment}
       />
 
@@ -269,7 +237,7 @@ export default function TavernPage() {
           setShowDeleteModal(false);
           setSelectedComment(null);
         }}
-        handleDelete={EC.remove}
+        handleDelete={remove}
         commentId={selectedComment?.id}
       />
     </Box>

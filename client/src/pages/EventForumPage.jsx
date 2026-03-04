@@ -38,7 +38,7 @@ export default function EventForumPage() {
   // Mock current user (replace with auth context)
   const currentUserId = 104; // ElfWizard_Luna for testing
 
-  const {comments, create, reply, edit, like, remove} = useEventComments(eventId)
+  const {comments, create, reply, edit, like, remove} = useEventComments(eventId, null)
 
 
   // ======================
@@ -144,7 +144,7 @@ export default function EventForumPage() {
         >
           <VStack align="stretch" gap={4}>
             {comments.map((comment) => (
-              <MotionBox key={comment.id} variants={staggerItem}>
+              <MotionBox key={comment.id} variants={staggerItem} initial="hidden" animate="visible">
                 <CommentCard
                   comment={comment}
                   currentUserId={currentUserId}

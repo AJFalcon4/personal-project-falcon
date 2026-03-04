@@ -23,7 +23,7 @@ class CommentSerializer(serializers.ModelSerializer):
             "likes",
             "replies",
         ]
-        read_only_fields = ["author", "event"]
+        read_only_fields = ["author", "event", "general"]
 
     def get_replies(self, curr_comment):
         replies = curr_comment.replies.all().order_by("time")

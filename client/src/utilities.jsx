@@ -283,6 +283,17 @@ export const fetchComments = async (setComments, event) => {
   }
 }
 
+export const fetchGeneralComments = async (setComments, year) => {
+  try {
+    const response = await api.get(`comment/general/${year}/`)
+    console.log(response)
+    setComments(response.data)
+  }
+  catch(e) {
+    console.error(e)
+  }
+}
+
 export const createComments = async (eventId, data) => {
   try {
     const response = await api.post(`comment/events/${eventId}/`, data);
@@ -292,6 +303,16 @@ export const createComments = async (eventId, data) => {
     return null;
   }
 };
+
+export const createGeneralComment = async (year, data) => {
+  try {
+    const response = await api.post(`comment/general/${year}/`, data);
+    return response.data;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
 
 
 export const deleteRecursive = (comments, id) => {
@@ -304,14 +325,14 @@ export const deleteRecursive = (comments, id) => {
 };
 
 
-export const deleteComment = async (_setComments, id) => {
+export const deleteComment = async (id) => {
   try {
     await api.delete(`comment/${id}/`);
   } catch (e) {
     console.error(e);
   }
 }
-export const updateComment = async (_setComments, _event, id, data) => {
+export const updateComment = async (id, data) => {
   try {
     const response = await api.put(`comment/${id}/`, data);
     return response.data; 

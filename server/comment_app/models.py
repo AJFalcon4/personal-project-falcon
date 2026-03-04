@@ -34,6 +34,8 @@ class Comment(models.Model):
         blank=True,
         default=list
     )
+
+    general = models.BooleanField(default=False)
     
     def __str__(self):
         return f"{self.author} on {self.event} said {self.text[:50]}..."
