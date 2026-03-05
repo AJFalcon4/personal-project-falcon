@@ -21,10 +21,17 @@ class GeneralCommentConsumer(AsyncWebsocketConsumer):
         )
 
     async def broadcast_comment(self, event):
-        await self.send(text_data=json.dumps({
-            "type": event["action"],
-            "comment": event["comment"],
-        }))
+        payload = {
+            "type": event["action"]
+        }
+
+        if "comment" in event:
+            payload["comment"] = event["comment"]
+
+        if "id" in event:
+            payload["id"] = event["id"]
+
+        await self.send(text_data=json.dumps(payload))
 
 class CommentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -45,10 +52,17 @@ class CommentConsumer(AsyncWebsocketConsumer):
         )
 
     async def broadcast_comment(self, event):
-        await self.send(text_data=json.dumps({
-            "type": event["action"],
-            "comment": event["comment"],
-        }))
+        payload = {
+            "type": event["action"]
+        }
+
+        if "comment" in event:
+            payload["comment"] = event["comment"]
+
+        if "id" in event:
+            payload["id"] = event["id"]
+
+        await self.send(text_data=json.dumps(payload))
 
 
 

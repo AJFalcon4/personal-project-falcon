@@ -156,8 +156,9 @@ class CommentView(APIView):
             ser = CommentSerializer(comment)
 
             channel_layer = get_channel_layer()
+            key = f"event_{comment.event.id}" if comment.event else f"general_{comment.time.year}"
             async_to_sync(channel_layer.group_send)(
-                f"event_{comment.event.id}",
+                key,
                 {
                     "type": "broadcast_comment",
                     "comment": ser.data,
@@ -179,8 +180,9 @@ class CommentView(APIView):
             comment_ser.save()
 
             channel_layer = get_channel_layer()
+            key = f"event_{comment.event.id}" if comment.event else f"general_{comment.time.year}"
             async_to_sync(channel_layer.group_send)(
-                f"event_{comment.event.id}",
+                key,
                 {
                     "type": "broadcast_comment",
                     "comment": comment_ser.data,
@@ -200,11 +202,13 @@ class CommentView(APIView):
             return Response({"detail": "Not authorized"}, status=HTTP_403_FORBIDDEN)
         # Broadcast delete to the event group before removing
         channel_layer = get_channel_layer()
+        key = f"event_{comment.event.id}" if comment.event else f"general_{comment.time.year}"
+        print(f"BROADCASTING TO {key}")
         async_to_sync(channel_layer.group_send)(
-            f"event_{comment.event.id}",
+            key,
             {
                 "type": "broadcast_comment",
-                "comment": {"id": comment.id},
+                "id": comment.id,
                 "action": "delete_comment",
             },
         )

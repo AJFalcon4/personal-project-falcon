@@ -85,10 +85,11 @@ export function useEventComments(eventId, year) {
     socket.onopen = () => {
       console.log("WebSocket connected");
     };
+    
 
     socket.onmessage = (e) => {
       const data = JSON.parse(e.data);
-
+      console.log("WS RECEIVED: ", data)
       switch (data.type) {
         case "new_comment":
           if (data.comment.parent) {

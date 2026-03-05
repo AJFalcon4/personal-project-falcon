@@ -10,6 +10,7 @@ import ReplyCommentModal from "../components/modals/ReplyCommentModal";
 import EditCommentModal from "../components/modals/EditCommentModal";
 import DeleteCommentModal from "../components/modals/DeleteCommentModal";
 import { MotionBox } from "../components/Motion";
+import { useOutletContext } from "react-router-dom";
 import { staggerContainer, staggerItem, fadeInUp } from "../components/animations/fffAnimations";
 import { useEventComments } from "../components/forum/ForumHelpers";
 
@@ -65,8 +66,8 @@ export default function TavernPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedComment, setSelectedComment] = useState(null);
   
-  // Mock current user
-  const currentUserId = 110;
+  const { user } = useOutletContext();
+  const currentUserId = user?.id;
 
   const handleReply = (comment) => {
     setSelectedComment(comment);
