@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   createComments,
   updateComment,
@@ -7,10 +7,13 @@ import {
 } from "../../utilities";
 
 
+
 import { fetchEvent } from "../../utilities";
 import { fetchComments, fetchGeneralComments } from "../../utilities";
 export function useEventComments(eventId, year) {
   const [comments, setComments] = useState([]);
+
+  const socketRef = useRef(null);
 
   // ======================
   // Tree helpers
@@ -67,6 +70,67 @@ export function useEventComments(eventId, year) {
   }, [eventId, year]);
 
   // ======================
+  // Websocket
+  // ======================
+  useEffect(() => {
+    if (!eventId && !year) return;
+
+    const wsUrl = eventId
+      ? `ws://localhost:8001/ws/comments/${eventId}/`
+      : `ws://localhost:8001/ws/comments/general/${year}/`;
+
+    const socket = new WebSocket(wsUrl);
+    socketRef.current = socket;
+
+    socket.onopen = () => {
+      console.log("WebSocket connected");
+    };
+
+    socket.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+
+      switch (data.type) {
+        case "new_comment":
+          if (data.comment.parent) {
+            setComments((prev) =>
+              addReply(prev, data.comment.parent, data.comment)
+            );
+          } else {
+            setComments((prev) => [...prev, data.comment]);
+          }
+          break;
+
+        case "update_comment":
+          setComments((prev) =>
+            updateRecursive(prev, data.comment)
+          );
+          break;
+
+        case "delete_comment":
+          setComments((prev) =>
+            deleteRecursive(prev, data.id)
+          );
+          break;
+
+        default:
+          break;
+      }
+    };
+
+    socket.onerror = (e) => {
+      console.error("WebSocket error:", e);
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket disconnected");
+    };
+
+    return () => {
+      socket.close();
+    };
+  }, [eventId, year]);
+
+  // ======================
   // CRUD methods comments
   // ======================
   const create = async (data, fromWS = false) => {
@@ -82,9 +146,9 @@ export function useEventComments(eventId, year) {
     } else {
       created = await createGeneralComment(year, {...data, general: true});
     }
-    if (created) {
-      setComments((prev) => [...prev, created]);
-    }
+    // if (created) {
+    //   setComments((prev) => [...prev, created]);
+    // }
   };
 
   const reply = async (parentId, data, fromWS = false) => {
@@ -108,9 +172,9 @@ export function useEventComments(eventId, year) {
       });
     }
 
-    if (created) {
-      setComments((prev) => addReply(prev, parentId, created));
-    }
+    // if (created) {
+    //   setComments((prev) => addReply(prev, parentId, created));
+    // }
   };
 
   const edit = async (updated, fromWS = false) => {

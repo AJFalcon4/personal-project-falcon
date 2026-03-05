@@ -10,12 +10,13 @@ class CommentSerializer(serializers.ModelSerializer):
         child=serializers.IntegerField(),
         required=False
     )
-
+    authorId = serializers.IntegerField(source='author.id', read_only=True)
     class Meta:
         model = Comment
         fields = [
             "id",
             "author",
+            "authorId",
             "parent",
             "event",
             "text",

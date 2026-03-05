@@ -296,6 +296,7 @@ export const fetchGeneralComments = async (setComments, year) => {
 
 export const createComments = async (eventId, data) => {
   try {
+    console.log(eventId, data)
     const response = await api.post(`comment/events/${eventId}/`, data);
     return response.data;
   } catch (e) {

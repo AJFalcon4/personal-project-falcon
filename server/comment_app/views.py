@@ -73,6 +73,7 @@ class GeneralCommentView(APIView):
 
         # -------- Broadcast --------
         channel_layer = get_channel_layer()
+        
         async_to_sync(channel_layer.group_send)(
             f"general_{year}",
             {
@@ -115,6 +116,7 @@ class CommentView(APIView):
                 ser.save(author=request.user, event=event)
                 # Broadcast new comment to the event group
                 channel_layer = get_channel_layer()
+                print("BROADCASTING TO:", f"event_{event.id}")
                 async_to_sync(channel_layer.group_send)(
                     f"event_{event.id}",
                     {
@@ -125,6 +127,8 @@ class CommentView(APIView):
                 )
                 return Response(ser.data, status=HTTP_201_CREATED)
             else:
+                print(ser.errors)
+                print(request)
                 return Response(ser.errors, status=HTTP_400_BAD_REQUEST)
         else:
             return Response("Need to signup/login!", status=HTTP_401_UNAUTHORIZED)

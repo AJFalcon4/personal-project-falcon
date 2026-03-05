@@ -10,6 +10,7 @@ import CreateCommentModal from "../components/modals/CreateCommentModal";
 import ReplyCommentModal from "../components/modals/ReplyCommentModal";
 import EditCommentModal from "../components/modals/EditCommentModal";
 import DeleteCommentModal from "../components/modals/DeleteCommentModal";
+import { useOutletContext } from "react-router-dom";
 import { MotionBox } from "../components/Motion";
 import { staggerContainer, staggerItem } from "../components/animations/fffAnimations";
 
@@ -35,8 +36,9 @@ export default function EventForumPage() {
   // Selected comment for actions
   const [selectedComment, setSelectedComment] = useState(null);
 
-  // Mock current user (replace with auth context)
-  const currentUserId = 104; // ElfWizard_Luna for testing
+  const { user } = useOutletContext();
+  const currentUserId = user?.id;
+
 
   const {comments, create, reply, edit, like, remove} = useEventComments(eventId, null)
 
